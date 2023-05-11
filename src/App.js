@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './App.css';
 
-function Gameboard() {
+function Gameboard({ currentPlayer, setCurrentPlayer }) {
   const [gameState, setGameState] = useState(Array(9).fill(null));
 
   function renderSquare(i) {
@@ -13,9 +13,12 @@ function Gameboard() {
   }
 
   function handleClick(i) {
-    const newGameState = [...gameState];
-    newGameState[i] = 'X';
-    setGameState(newGameState);
+    if (gameState[i] === null) {
+      const newGameState = [...gameState];
+      newGameState[i] = currentPlayer;
+      setGameState(newGameState);
+      setCurrentPlayer(currentPlayer === 'X' ? 'O' : 'X');
+    }
   }
 
   return (
@@ -41,7 +44,7 @@ function Gameboard() {
 
 function Player({ name, mark }) {
   return (
-    <div>
+    <div className="Player">
       <h2>{name}</h2>
       <p>{mark}</p>
     </div>
@@ -54,7 +57,7 @@ function Game() {
   return (
     <div className="game">
       <div className="game-board">
-        <Gameboard />
+        <Gameboard currentPlayer={currentPlayer} setCurrentPlayer={setCurrentPlayer} />
       </div>
       <div className="game-info">
         <Player name="Player 1" mark="X" />
