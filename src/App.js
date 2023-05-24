@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import './App.css';
 
-function Gameboard({ currentPlayer, setCurrentPlayer }) {
+
+function Gameboard({ currentPlayer, setCurrentPlayer, winner, setWinner }) {
   const [gameState, setGameState] = useState(Array(9).fill(null));
 
   function renderSquare(i) {
@@ -13,42 +14,38 @@ function Gameboard({ currentPlayer, setCurrentPlayer }) {
   }
 
   function handleClick(i) {
-    if (gameState[i] === null) {
+    if (gameState[i] === null && winner === null) {
       const newGameState = [...gameState];
       newGameState[i] = currentPlayer;
       setGameState(newGameState);
       setCurrentPlayer(currentPlayer === 'X' ? 'O' : 'X');
+      checkWinner();
     }
   }
 
-  function checkForWinner(){
-    const winningRows = [
-      [0 ,1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-
+  function checkWinner() {
+    const winningCombinations = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+      [0, 4, 8], [2, 4, 6] // diagonals
     ];
-    for (let i = 0; i < winningRows.length; i++){
-      const [a,b,c] = winningRows[i];
-      if(gameState[a] && gameState[a] === gameState[b] && gameState[b] === gameState[c]){
-        return gameState[a];
+
+    for (let i = 0; i < winningCombinations.length; i++) {
+      const [a, b, c] = winningCombinations[i];
+      if (
+        gameState[a] &&
+        gameState[a] === gameState[b] &&
+        gameState[a] === gameState[c]
+      ) {
+        setWinner(gameState[a]);
+        return;
       }
     }
-    return null;
-  }
-  const winner = checkForWinner();
-  let status;
-  if (winner) {
-    status = `Winner: ${winner}`;
-  } else{
-    status = `Next Player: ${currentPlayer}`;
-  }
 
+    if (!gameState.includes(null)) {
+      setWinner('Draw');
+    }
+  }
 
   return (
     <div>
@@ -82,15 +79,26 @@ function Player({ name, mark }) {
 
 function Game() {
   const [currentPlayer, setCurrentPlayer] = useState('X');
+  const [winner, setWinner] = useState(null);
 
   return (
     <div className="game">
       <div className="game-board">
-        <Gameboard currentPlayer={currentPlayer} setCurrentPlayer={setCurrentPlayer} />
+      <Gameboard
+          currentPlayer={currentPlayer}
+          setCurrentPlayer={setCurrentPlayer}
+          winner={winner} 
+          setWinner={setWinner}
+        />
       </div>
       <div className="game-info">
         <Player name="Player 1" mark="X" />
         <Player name="Player 2" mark="O" />
+        {winner && (
+          <div className="winner-message">
+            {winner === 'Draw' ? 'It\'s a draw!' : `Player ${winner} wins!`}
+          </div>
+        )}
       </div>
     </div>
   );
